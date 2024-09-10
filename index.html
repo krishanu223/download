@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <button id="downloadBtn" onclick="downloadFile(url, filename)">Download Video</button>
+
+
+</body>
+<script>
+    // The direct video URL
+
+    let url = "https://instagram.fflr4-2.fna.fbcdn.net/o1/v/t16/f2/m69/An-vVysgO3ZW2LfxGsAaPC8B4_FLY93eSJB5MF6EjUymVv3Dm61J8lPE_XDfGKsRHKK0zSrCFcUjcxLTZNOxcUfh.mp4?stp=dst-mp4&efg=eyJ2ZW5jb2RlX3RhZyI6InZ0c192b2RfdXJsZ2VuLmNsaXBzLmMyLjEwODAuYmFzZWxpbmUifQ&_nc_cat=109&vs=3743481205906018_928538120&_nc_vs=HBksFQIYOnBhc3N0aHJvdWdoX2V2ZXJzdG9yZS9HQmN4SkFmdUFEOXN2NkVCQUg0b1BfaFk2N0FuYnBSMUFBQUYVAALIAQAVAhg6cGFzc3Rocm91Z2hfZXZlcnN0b3JlL0dDZVE1eHBDck5Ic1ZaRWNBRHhrTVFYajFLZ19icV9FQUFBRhUCAsgBACgAGAAbABUAACbKyMaSjNuXQBUCKAJDMywXQDD0OVgQYk4YFmRhc2hfYmFzZWxpbmVfMTA4MHBfdjERAHX%2BBwA%3D&_nc_rid=e3392d874f&ccb=9-4&oh=00_AYA8CIUinQF04uiAtevzYt-hg2Y4_ILPD0qVGT6zLc1RXA&oe=66E1E838&_nc_sid=10d13b"
+    let filename = "krishnau.mp4";
+    let butn = document.querySelector('#downloadBtn')
+    async function downloadFile(url, filename) {
+        // Start the file download using fetch
+        const response = await fetch(url);
+
+        // Create a reader to stream the response
+        const reader = response.body.getReader();
+
+        // Get the total length (if available)
+        const contentLength = +response.headers.get('Content-Length');
+
+        // Prepare variables to track the download progress
+        let receivedLength = 0;
+        const chunks = []; // Array to store each chunk of the file
+
+        // Loop to read each chunk
+        while (true) {
+            const {
+                done,
+                value
+            } = await reader.read();
+
+            if (done) {
+                break; // Download complete
+            }
+
+            chunks.push(value);
+            receivedLength += value.length;
+
+            // Display download progress (if content length is available)
+            if (contentLength) {
+                butn.textContent = (receivedLength / contentLength * 100).toFixed(2)
+                console.log(`Downloaded ${(receivedLength / contentLength * 100).toFixed(2)}%`);
+            } else {
+                console.log(`Downloaded ${receivedLength} bytes`);
+            }
+        }
+
+        // Combine the chunks into a single Uint8Array
+        const blob = new Blob(chunks);
+
+        // Trigger file download using an anchor element
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Clean up the object URL
+        URL.revokeObjectURL(link.href);
+
+        console.log('File download complete');
+    }
+
+    // Example usage
+</script>
+
+</html>
